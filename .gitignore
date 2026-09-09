@@ -1,0 +1,13 @@
+node_modules
+.DS_Store
+dist
+
+# Test / coverage output
+coverage
+*.lcov
+
+# Playwright
+test-results
+playwright-report
+blob-report
+playwright/.cache
