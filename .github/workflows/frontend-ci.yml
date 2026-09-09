@@ -1,0 +1,124 @@
+# Frontend CI
+#
+# This runs automatically on GitHub and checks the project 4 ways:
+#   1. lint  - checks the code style of the HTML, CSS and JS
+#   2. test  - runs the unit tests
+#   3. build - makes sure the site still builds for production
+#   4. e2e   - opens the site in multiple browsers and tests it (Playwright)
+#
+# Each check is its own "job". They run at the same time, so if something
+# breaks you can see exactly which check failed.
+
+name: Frontend CI
+
+# When should this run?
+on:
+  push:
+    branches: [main] # when code is pushed to the main branch
+  pull_request:
+    branches: [main] # when a pull request into main is opened or updated
+
+# If you push again before the previous run finishes, cancel the old run.
+# No point testing code that's already outdated.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The Node.js version to use
+env:
+  NODE_VERSION: 22
+
+jobs:
+  # -------------------------------------------------------------------------
+  # 1. LINT - checks code style. Runs `npm run lint`.
+  # -------------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      # Copy the repo onto the machine
+      - uses: actions/checkout@v4
+
+      # Install Node.js and reuse the npm cache between runs so it's faster
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      # Install the exact packages from package-lock.json
+      - run: npm ci
+
+      # Run the linters
+      - run: npm run lint
+
+  # -------------------------------------------------------------------------
+  # 2. UNIT TESTS - runs the test files once. Runs `npm test`.
+  # -------------------------------------------------------------------------
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  # -------------------------------------------------------------------------
+  # 3. BUILD - makes sure `npm run build` still works, then saves the
+  #    built site so you can download it from the run page if you want.
+  # -------------------------------------------------------------------------
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      # Save the "dist" folder for 7 days
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  # -------------------------------------------------------------------------
+  # 4. E2E TESTS - runs the browser tests with Playwright.
+  #    `needs` means this waits until lint, test and build all pass first,
+  #    so we don't start up browsers if something is already broken.
+  #    Playwright starts the site by itself (see playwright.config.js).
+  # -------------------------------------------------------------------------
+  e2e:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    needs: [lint, test, build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      # Download the browsers Playwright needs
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      # Run the browser tests
+      - name: Run Playwright tests
+        run: npm run test:e2e
+
+      # Save the test report even if the tests failed, so you can see why
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
