@@ -1,0 +1,91 @@
+# CD: publishes the built site to GitHub Pages
+# It only runs after Frontend CI succeeds, so broken code never gets deployed
+
+name: Frontend CD
+
+on:
+  # Run after the "Frontend CI" workflow finishes on main
+  workflow_run:
+    workflows: ["Frontend CI"]
+    types: [completed]
+    branches: [main]
+
+  # Also allow manual deployment from the Actions tab
+  workflow_dispatch:
+
+# Permissions needed to publish to GitHub Pages
+permissions:
+  contents: read # check out the repo
+  pages: write # publish to Pages
+  id-token: write # let Pages verify this deploy
+
+# Run one deploy at a time and don't interrupt a deploy in progress
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  # 1. Build the website and package it for GitHub Pages
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+
+    # only continue if CI passed (or we triggered it manually)
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        github.event.workflow_run.conclusion == 'success'
+      }}
+
+    steps:
+      # Check out the exact commit CI tested, not whatever is newest
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+
+      # Install Node with npm caching for speed
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      # Install dependencies from package-lock.json
+      - name: Install dependencies
+        run: npm ci
+
+      # Get Pages settings (used for the base path below)
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      # GitHub Pages deploys this project from a subfolder, so --base rewrites
+      # asset links to match or the page loads blank
+      - name: Build
+        run: npm run build -- --base "${{ steps.pages.outputs.base_path }}/"
+
+      # Package the dist folder into a GitHub Pages artifact
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  # 2. Publish the artifact to GitHub Pages
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+
+    # Shows the live URL in the GitHub UI
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
