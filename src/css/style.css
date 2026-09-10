@@ -2,7 +2,7 @@
    This is the stylesheet for the giveaway landing page — the "WIN
    Everything You Need for the Journey Home" competition page with the
    entry form.
- 
+
    The colors, fonts, and button/form styles are based on the real
    Andrew Simms Group website. I found them by opening the site, using
    the browser's "Inspect" tool to look at the page's code, and finding
@@ -22,10 +22,15 @@
   --font-family: "Montserrat", sans-serif;
   --wrapper-max: 1400px;
   --wrapper-max-sml: 900px;
+
+  /* Field inset and text size — shared so the placeholder-style label lines up
+     with the text the input renders at the same padding and size. */
+  --field-padding: 12px;
+  --field-font-size: 16px;
 }
 
 /* ==========================================================================
-   Base 
+   Base
    ========================================================================== */
 
 *,
@@ -89,6 +94,10 @@ h3 {
   margin-top: -10px;
 }
 
+.white-txt {
+  color: var(--brand-white);
+}
+
 @media (width >= 1025px) {
   h1 {
     font-size: 40px;
@@ -111,22 +120,34 @@ h3 {
    Layout
    ========================================================================== */
 
-.wrapper {
+.wrapper,
+.sml-wrapper {
   width: 100%;
-  max-width: var(--wrapper-max);
   margin: 0 auto;
-  padding: 40px;
+  padding: 40px 20px;
+}
+
+@media (width >= 700px) {
+  .wrapper,
+  .sml-wrapper {
+    padding: 40px;
+  }
+}
+
+.wrapper {
+  max-width: var(--wrapper-max);
 }
 
 .sml-wrapper {
-  width: 100%;
   max-width: var(--wrapper-max-sml);
-  margin: 0 auto;
-  padding: 40px;
 }
 
 .t-center {
   text-align: center;
+}
+
+.t-left {
+  text-align: left;
 }
 
 .m-top {
@@ -139,6 +160,10 @@ h3 {
 
 .grey-bg {
   background-color: var(--brand-grey-bg);
+}
+
+.black-bg {
+  background-color: var(--brand-black);
 }
 
 @media (width >= 1025px) {
@@ -162,21 +187,38 @@ h3 {
   font-size: 14px;
   text-transform: uppercase;
   text-align: center;
+  background-position: center;
   cursor: pointer;
   transition:
-    background 0.4s ease,
+    background 0.8s ease,
     color 0.4s ease;
 }
 
+/* Two knobs drive every .btn-primary: --btn-bg at rest, --btn-bg-hover for the
+   ripple. Variants (e.g. .form-submit) only reset those two custom properties. */
 .btn-primary {
-  background-color: var(--brand-red);
+  --btn-bg: var(--brand-red);
+  --btn-bg-hover: var(--brand-grey-text);
+
+  background-color: var(--btn-bg);
   color: var(--brand-white);
   border: 1px solid var(--brand-white);
 }
 
+/* Ripple press effect, lifted from the Andrew Simms button styles: a huge
+   radial-gradient normally hides off-screen, then snaps to size on :active so
+   the fill spreads out from the point of contact. */
 .btn-primary:hover {
-  background-color: var(--brand-black);
+  background: var(--btn-bg-hover)
+    radial-gradient(circle, transparent 1%, var(--btn-bg-hover) 1%) center /
+    15000%;
   color: var(--brand-white);
+}
+
+.btn-primary:active {
+  background-color: #555;
+  background-size: 100%;
+  transition: background 0s;
 }
 
 .btn-outline {
@@ -202,12 +244,14 @@ h3 {
 .form-control {
   display: block;
   width: 100%;
-  padding: 15px 10px;
+  padding: var(--field-padding);
   font-family: var(--font-family);
-  font-size: 16px;
+  font-size: var(--field-font-size);
+  line-height: 1.43;
   color: var(--brand-black);
   background-color: var(--brand-white);
   border: 1px solid var(--brand-red);
+  border-radius: 0;
   outline: none;
   transition: border-color 0.15s ease-in-out;
 }
@@ -216,15 +260,31 @@ h3 {
   border-color: var(--brand-red);
 }
 
+/* Floated state — the resting position once a field has a value. The label
+   rides the top border in a small red chip. */
 .form-group > label {
   position: absolute;
   top: -10px;
-  left: 2px;
+  left: 0;
+  z-index: 1;
   padding: 0 5px;
   background: var(--brand-white);
   color: var(--brand-red);
   font-size: 12px;
   line-height: 1.5em;
+  cursor: text;
+  transition: all 0.4s ease-in-out;
+}
+
+/* Placeholder state — while the field is empty the label drops into the field
+   and reads like placeholder text. Typing removes `empty` (see main.js) and it
+   animates back up to the floated state above. */
+.form-control.empty + label {
+  top: 0;
+  padding: var(--field-padding);
+  background-color: transparent;
+  color: var(--brand-grey-text);
+  font-size: var(--field-font-size);
 }
 
 /* ==========================================================================
@@ -245,16 +305,14 @@ h3 {
 
 .radio-labels {
   display: inline-block;
-  border: 2px solid var(--brand-black);
+  border: 1px solid rgb(255 255 255 / 45%);
   border-radius: 19px;
-  color: var(--brand-black);
+  color: var(--brand-white);
   padding: 8px 20px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+  transition: 0.2s ease;
 }
 
 .radio-hidden:checked + .radio-labels {
@@ -303,7 +361,7 @@ h3 {
 }
 
 .body-copy .cta-text {
-  color: var(--brand-black);
+  color: var(--brand-white);
   font-weight: 700;
 }
 
@@ -316,7 +374,7 @@ h3 {
   margin: 30px 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 30px;
 }
 
@@ -327,8 +385,9 @@ h3 {
 }
 
 .prize-card img {
+  width: 200px;
+  max-width: 100%;
   margin: 0 auto 15px;
-  max-width: 200px;
 }
 
 .prize-card h3 {
@@ -337,12 +396,44 @@ h3 {
 }
 
 /* ==========================================================================
-   Entry form extras
+   Entry form
    ========================================================================== */
 
-.btn-block {
-  display: block;
-  width: 100%;
+.entry-form h2 {
+  margin-bottom: 35px;
+}
+
+/* Red grouping headings, e.g. "Your Details" / "About You" */
+.form-section-label {
+  margin: 35px 0 25px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgb(255 255 255 / 20%);
+  color: var(--brand-red);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.form-section-label:first-of-type {
+  margin-top: 0;
+}
+
+/* First name / last name sit side by side, stacking on narrow screens */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 20px;
+}
+
+@media (width >= 700px) {
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-row .form-group {
+  min-width: 0;
 }
 
 .vehicle-question {
@@ -355,6 +446,19 @@ h3 {
   padding: 0;
   margin-bottom: 12px;
   font-weight: 700;
+  color: var(--brand-white);
+}
+
+/* Submit button — full width, and a dark base so the .btn-primary ripple reads
+   against the black form section. Only the two colour knobs change. */
+.form-submit {
+  --btn-bg: var(--brand-black);
+  --btn-bg-hover: var(--brand-grey-text);
+
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid var(--brand-red);
 }
 
 .form-message {
@@ -365,5 +469,5 @@ h3 {
 }
 
 .form-message.is-success {
-  color: var(--brand-black);
+  color: var(--brand-white);
 }
