@@ -1,6 +1,7 @@
 import "../css/style.css";
 
 import { submitEntry } from "./submitEntry.js";
+import { isGiveawayClosed, closeGiveawayForm } from "./giveawayStatus.js";
 
 import logo from "/logo.png";
 import carSeat from "../assets/images/prizes/car-seat.png";
@@ -180,43 +181,50 @@ function showMessage(text, isError) {
   formMessage.hidden = false;
 }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault(); // stop the normal page reload
+/* Once the giveaway has closed (start of 18 Sep 2026, NZ time), lock the form:
+   disable every field and the submit button, and show a "closed" message.
+   Skip wiring up the submit handler entirely so no entry can be sent. */
+if (isGiveawayClosed()) {
+  closeGiveawayForm(form, formMessage);
+} else {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault(); // stop the normal page reload
 
-  // Re-check the phone number in case it was autofilled (no "input" event).
-  updatePhoneValidity();
+    // Re-check the phone number in case it was autofilled (no "input" event).
+    updatePhoneValidity();
 
-  // The form tag has "novalidate", so the browser won't check the fields
-  // on its own. Do that check here and show its built-in error bubbles.
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
+    // The form tag has "novalidate", so the browser won't check the fields
+    // on its own. Do that check here and show its built-in error bubbles.
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
 
-  // Disable the button so the user can't submit twice while waiting
-  submitButton.disabled = true;
-  showMessage("Sending your entry…", false);
+    // Disable the button so the user can't submit twice while waiting
+    submitButton.disabled = true;
+    showMessage("Sending your entry…", false);
 
-  try {
-    await submitEntry(form); // send the entry and wait for it to finish
-    form.reset(); // clear all the fields
+    try {
+      await submitEntry(form); // send the entry and wait for it to finish
+      form.reset(); // clear all the fields
 
-    // form.reset() empties the inputs but doesn't fire an "input" event,
-    // so add the "empty" class back ourselves to reset the floating labels.
-    form
-      .querySelectorAll(".form-control")
-      .forEach((input) => input.classList.add("empty"));
+      // form.reset() empties the inputs but doesn't fire an "input" event,
+      // so add the "empty" class back ourselves to reset the floating labels.
+      form
+        .querySelectorAll(".form-control")
+        .forEach((input) => input.classList.add("empty"));
 
-    showMessage("Thanks for your submission", false);
-  } catch (error) {
-    // submitEntry threw, so the send failed.
-    console.error("Giveaway entry failed to send:", error);
-    showMessage(
-      "Sorry, something went wrong. Please try again in a moment.",
-      true,
-    );
-  } finally {
-    // Runs whether it succeeded or failed: let the user try again.
-    submitButton.disabled = false;
-  }
-});
+      showMessage("Thanks for your submission", false);
+    } catch (error) {
+      // submitEntry threw, so the send failed.
+      console.error("Giveaway entry failed to send:", error);
+      showMessage(
+        "Sorry, something went wrong. Please try again in a moment.",
+        true,
+      );
+    } finally {
+      // Runs whether it succeeded or failed: let the user try again.
+      submitButton.disabled = false;
+    }
+  });
+}
