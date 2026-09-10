@@ -1,5 +1,7 @@
 import "../css/style.css";
 
+import { submitEntry } from "./submitEntry.js";
+
 import logo from "/logo.png";
 import carSeat from "../assets/images/prizes/car-seat.png";
 import nappyBag from "../assets/images/prizes/nappy-bag.png";
@@ -75,7 +77,7 @@ document.querySelector("#app").innerHTML = `
       </div>
 
       <div class="form-group">
-        <input class="form-control empty" type="tel" id="phone" name="phone" required />
+        <input class="form-control empty" type="tel" id="phone" name="phone" inputmode="numeric" required />
         <label for="phone">Phone Number*</label>
       </div>
 
@@ -100,13 +102,118 @@ document.querySelector("#app").innerHTML = `
 </section>
 `;
 
-/* Floating labels — mirrors the andrewsimms.co.nz behaviour: each <label> sits
-   inside its field like a placeholder until the control holds a value, then
-   animates up to the border. The CSS keys off an `empty` class we keep in sync. */
-document.querySelectorAll("#giveaway-form .form-control").forEach((control) => {
-  const syncEmpty = () =>
-    control.classList.toggle("empty", control.value === "");
-  syncEmpty();
-  control.addEventListener("input", syncEmpty);
-  control.addEventListener("blur", syncEmpty);
+/* Floating labels: each label starts inside its input like a placeholder.
+   Once the input has text, CSS moves the label up to the border.
+   The CSS does this by looking for the "empty" class, so our job here
+   is just to add "empty" when the input is blank and remove it when it isn't. */
+document.querySelectorAll("#giveaway-form .form-control").forEach((input) => {
+  // Add or remove the "empty" class based on whether the input is blank
+  function updateEmptyClass() {
+    const isBlank = input.value === "";
+    input.classList.toggle("empty", isBlank);
+  }
+
+  updateEmptyClass(); // set the correct class when the page loads
+  input.addEventListener("input", updateEmptyClass); // ...while the user types
+  input.addEventListener("blur", updateEmptyClass); // ...when they leave the field
+});
+
+/* Phone field: it must be a valid New Zealand phone number.
+  1. While the user types, strip out anything that isn't a digit or a space,
+    so the field never holds letters or symbols.
+  2. Check the number against the NZ formats below. setCustomValidity() feeds
+    the result into the same form.checkValidity() call used on submit, so an
+    invalid number blocks submission and shows this message. */
+const phoneInput = document.querySelector("#phone");
+
+// Returns true if `value` looks like a real NZ phone number.
+function isNewZealandPhone(value) {
+  // Keep digits only, then treat a "+64" / "64" country code as the local "0".
+  let digits = value.replace(/[^0-9]/g, "");
+  if (digits.startsWith("64")) {
+    digits = "0" + digits.slice(2);
+  }
+
+  const mobile = /^02\d{7,9}$/; // 021/022/027... then 7-9 more digits
+  const landline = /^0[34679]\d{7}$/; // 03/04/06/07/09 area code + 7 digits
+  const tollFree = /^0(800|508)\d{6,7}$/; // 0800 / 0508 numbers
+
+  return mobile.test(digits) || landline.test(digits) || tollFree.test(digits);
+}
+
+// Show an error on the phone field if it has a value that isn't a valid
+// NZ number. An empty field is left to the "required" check instead.
+function updatePhoneValidity() {
+  if (phoneInput.value !== "" && !isNewZealandPhone(phoneInput.value)) {
+    phoneInput.setCustomValidity(
+      "Please enter a valid New Zealand phone number.",
+    );
+  } else {
+    phoneInput.setCustomValidity("");
+  }
+}
+
+phoneInput.addEventListener("input", () => {
+  // Allow digits and spaces only, then re-check the number.
+  const cleaned = phoneInput.value.replace(/[^0-9 ]/g, "");
+  if (phoneInput.value !== cleaned) {
+    phoneInput.value = cleaned;
+  }
+  updatePhoneValidity();
+});
+
+/* Form submission: instead of the browser reloading the page on submit,
+  stop it and send the entry ourselves (via submitEntry) */
+const form = document.querySelector("#giveaway-form");
+const formMessage = document.querySelector("#formMessage");
+const submitButton = form.querySelector(".form-submit");
+
+// Show a status line under the form.
+// Pass isError = true for an error (CSS shows it red),
+// or false for a normal/success message (CSS shows it white).
+function showMessage(text, isError) {
+  formMessage.textContent = text;
+  formMessage.classList.toggle("is-success", isError === false);
+  formMessage.hidden = false;
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault(); // stop the normal page reload
+
+  // Re-check the phone number in case it was autofilled (no "input" event).
+  updatePhoneValidity();
+
+  // The form tag has "novalidate", so the browser won't check the fields
+  // on its own. Do that check here and show its built-in error bubbles.
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  // Disable the button so the user can't submit twice while waiting
+  submitButton.disabled = true;
+  showMessage("Sending your entry…", false);
+
+  try {
+    await submitEntry(form); // send the entry and wait for it to finish
+    form.reset(); // clear all the fields
+
+    // form.reset() empties the inputs but doesn't fire an "input" event,
+    // so add the "empty" class back ourselves to reset the floating labels.
+    form
+      .querySelectorAll(".form-control")
+      .forEach((input) => input.classList.add("empty"));
+
+    showMessage("Thanks for your submission", false);
+  } catch (error) {
+    // submitEntry threw, so the send failed.
+    console.error("Giveaway entry failed to send:", error);
+    showMessage(
+      "Sorry, something went wrong. Please try again in a moment.",
+      true,
+    );
+  } finally {
+    // Runs whether it succeeded or failed: let the user try again.
+    submitButton.disabled = false;
+  }
 });
