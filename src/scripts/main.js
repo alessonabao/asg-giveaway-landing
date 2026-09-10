@@ -31,7 +31,7 @@ document.querySelector("#app").innerHTML = `
       <p class="cta-text">Enter now for your chance to win this fantastic prize pack.</p>
     </div>
 
-    <a class="btn btn-primary" href="#entry-form" data-scroll>Enter Competition</a>
+    <a class="btn btn-primary" href="#entry-form">Enter Competition</a>
   </div>
 </section>
 
@@ -101,6 +101,9 @@ document.querySelector("#app").innerHTML = `
   </div>
 </section>
 `;
+
+/* Smooth scroll for the "Enter Competition" anchor link is handled in CSS
+   (html { scroll-behavior: smooth }), gated on prefers-reduced-motion. */
 
 /* Floating labels: each label starts inside its input like a placeholder.
    Once the input has text, CSS moves the label up to the border.
