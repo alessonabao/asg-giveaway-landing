@@ -2,6 +2,11 @@ node_modules
 .DS_Store
 dist
 
+# Local secrets (EmailJS credentials, etc.)
+.env
+.env.local
+.env.*.local
+
 # Test / coverage output
 coverage
 *.lcov
