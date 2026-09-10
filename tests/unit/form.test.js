@@ -83,7 +83,7 @@ describe("Test giveaway form", () => {
     expect(form.checkValidity()).toBe(false);
   });
 
-  test("form is invalid when the email is malformed", () => {
+  test("form correctly rejects invalid email formats", () => {
     const form = fillForm({
       firstName: "Andrew",
       lastName: "Simms",
