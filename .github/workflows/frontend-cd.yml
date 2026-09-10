@@ -67,6 +67,11 @@ jobs:
       # asset links to match or the page loads blank
       - name: Build
         run: npm run build -- --base "${{ steps.pages.outputs.base_path }}/"
+        env:
+          VITE_EMAILJS_SERVICE_ID: ${{ vars.VITE_EMAILJS_SERVICE_ID }}
+          VITE_EMAILJS_TEMPLATE_ID: ${{ vars.VITE_EMAILJS_TEMPLATE_ID }}
+          VITE_EMAILJS_PUBLIC_KEY: ${{ vars.VITE_EMAILJS_PUBLIC_KEY }}
+          VITE_SEND_TO_CLIENT: ${{ vars.VITE_SEND_TO_CLIENT }}
 
       # Package the dist folder into a GitHub Pages artifact
       - name: Upload Pages artifact
