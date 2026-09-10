@@ -56,7 +56,6 @@ The planning step mattered most. If a plan is wrong, I can see that by reading a
 
 I treated anything Claude wrote as a first draft, not a final answer. If I did not fully understand it, it either got rewritten or left out. I also kept the comments in the code in plain English, so the reasoning behind each part stays easy to follow later.
 
-```markdown
 ## Tech stack
 
 | Choice | Why |
@@ -67,7 +66,6 @@ I treated anything Claude wrote as a first draft, not a final answer. If I did n
 | **Playwright** | Tests across multiple browsers and screen sizes, including no horizontal scroll. |
 | **ESLint, Stylelint, HTMLHint** | Catches code and style mistakes before they're merged. |
 | **GitHub Actions + GitHub Pages** | Free CI and hosting. Deploys only after tests pass. |
-```
 
 ## Project structure
 
@@ -120,7 +118,6 @@ tests/
 ```
 
 Note: in local dev, form submissions are routed to a test inbox rather than the client's real addresses, so it's safe to submit test entries while developing.
-```
 
 ## Environment variables
 
