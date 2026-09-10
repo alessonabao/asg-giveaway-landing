@@ -47,6 +47,10 @@ body {
   line-height: 1.5em;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 img {
   max-width: 100%;
   height: auto;
