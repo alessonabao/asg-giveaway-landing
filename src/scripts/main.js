@@ -62,12 +62,12 @@ document.querySelector("#app").innerHTML = `
 
       <div class="form-row">
         <div class="form-group">
-          <input class="form-control empty" type="text" id="firstName" name="firstName" pattern="[A-Za-z\s'-]+" required />
+          <input class="form-control empty" type="text" id="firstName" name="firstName" pattern="[A-Za-z\\s'-]+" required />
           <label for="firstName">First Name*</label>
         </div>
 
         <div class="form-group">
-          <input class="form-control empty" type="text" id="lastName" name="lastName" pattern="[A-Za-z\s'-]+" required />
+          <input class="form-control empty" type="text" id="lastName" name="lastName" pattern="[A-Za-z\\s'-]+" required />
           <label for="lastName">Last Name*</label>
         </div>
       </div>
