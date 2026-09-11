@@ -20,16 +20,6 @@ Once everything worked locally, I updated the config so it would also work in th
 
 ## Use of AI
 
-I used Claude as a pair programmer throughout. It was most useful for:
-
-- Scaffolding the Vite project and the initial config files for ESLint, Stylelint, HTMLHint, Vitest, and Playwright.
-- Drafting the New Zealand phone number validation regex, which I then tested against real number formats.
-- Working through the timezone logic for the giveaway closing date, so the cutoff lands at midnight NZ time regardless of where the code runs.
-- Writing the GitHub Actions workflows and explaining the `workflow_run` trigger.
-- Rubber-ducking edge cases in the form flow like resetting the floating labels after `form.reset()`.
-
-## Use of AI
-
 I used Claude as a coding partner throughout the project. It helped most with:
 
 - Setting up the Vite project and the config files for ESLint, Stylelint, HTMLHint, Vitest, and Playwright.
@@ -58,14 +48,14 @@ I treated anything Claude wrote as a first draft, not a final answer. If I did n
 
 ## Tech stack
 
-| Choice | Why |
-| --- | --- |
-| **Vite** | Fast dev server, simple build, easy GitHub Pages setup. |
-| **EmailJS** | Sends form emails without needing a backend server. |
-| **Vitest + jsdom** | Fast unit tests for validation, dates, and email data. |
-| **Playwright** | Tests across multiple browsers and screen sizes, including no horizontal scroll. |
-| **ESLint, Stylelint, HTMLHint** | Catches code and style mistakes before they're merged. |
-| **GitHub Actions + GitHub Pages** | Free CI and hosting. Deploys only after tests pass. |
+| Choice                            | Why                                                                              |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| **Vite**                          | Fast dev server, simple build, easy GitHub Pages setup.                          |
+| **EmailJS**                       | Sends form emails without needing a backend server.                              |
+| **Vitest + jsdom**                | Fast unit tests for validation, dates, and email data.                           |
+| **Playwright**                    | Tests across multiple browsers and screen sizes, including no horizontal scroll. |
+| **ESLint, Stylelint, HTMLHint**   | Catches code and style mistakes before they're merged.                           |
+| **GitHub Actions + GitHub Pages** | Free CI and hosting. Deploys only after tests pass.                              |
 
 ## Project structure
 
@@ -108,7 +98,7 @@ tests/
    npm run dev
 ```
 
-   The site will be available at the local URL shown in the terminal (usually `http://localhost:5173`).
+The site will be available at the local URL shown in the terminal (usually `http://localhost:5173`).
 
 4. **Run the tests** (optional but recommended).
 
@@ -123,12 +113,12 @@ Note: in local dev, form submissions are routed to a test inbox rather than the 
 
 All four are Vite variables, so they are bundled into the shipped site. That is expected for EmailJS, where the public key is meant to be public.
 
-| Variable | Purpose |
-| --- | --- |
-| `VITE_EMAILJS_SERVICE_ID` | EmailJS service |
-| `VITE_EMAILJS_TEMPLATE_ID` | EmailJS template |
-| `VITE_EMAILJS_PUBLIC_KEY` | EmailJS public key |
-| `VITE_SEND_TO_CLIENT` | Set to `"true"` only on the verified production deploy to route entries to the client inboxes. Anything else routes to the developer inbox. |
+| Variable                   | Purpose                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_EMAILJS_SERVICE_ID`  | EmailJS service                                                                                                                             |
+| `VITE_EMAILJS_TEMPLATE_ID` | EmailJS template                                                                                                                            |
+| `VITE_EMAILJS_PUBLIC_KEY`  | EmailJS public key                                                                                                                          |
+| `VITE_SEND_TO_CLIENT`      | Set to `"true"` only on the verified production deploy to route entries to the client inboxes. Anything else routes to the developer inbox. |
 
 On the deployed site these come from GitHub repository variables, passed into the build step in both workflows.
 
@@ -147,3 +137,7 @@ These were genuinely helpful while building this:
 - [Playwright best practices](https://playwright.dev/docs/best-practices) for writing e2e tests that are not flaky.
 - [Send emails from a static site with EmailJS](https://medium.com/@aashisrijal252/send-emails-from-a-static-website-for-free-using-emailjs-no-backend-needed-by-aashis-rijal-80c9cb892221) for the no-backend form delivery.
 - [Structuring an HTML/CSS project](https://blog.mikecodeur.com/en/post/structure-your-htmlcss-project-best-practices) for the folder layout.
+
+```
+
+```
