@@ -119,6 +119,15 @@ jobs:
       # Run the browser tests
       - name: Run Playwright tests
         run: npm run test:e2e
+        env:
+          # Playwright's webServer starts `vite dev` itself, so it needs these
+          # to be set here (the `build` job's env above only covers `npm run
+          # build`). Tests intercept the EmailJS network call rather than
+          # sending for real, but the SDK needs non-empty values to get as
+          # far as making that call.
+          VITE_EMAILJS_SERVICE_ID: ${{ vars.VITE_EMAILJS_SERVICE_ID }}
+          VITE_EMAILJS_TEMPLATE_ID: ${{ vars.VITE_EMAILJS_TEMPLATE_ID }}
+          VITE_EMAILJS_PUBLIC_KEY: ${{ vars.VITE_EMAILJS_PUBLIC_KEY }}
 
       # Save the test report even if the tests failed, so you can see why
       - uses: actions/upload-artifact@v4
