@@ -137,7 +137,3 @@ These were genuinely helpful while building this:
 - [Playwright best practices](https://playwright.dev/docs/best-practices) for writing e2e tests that are not flaky.
 - [Send emails from a static site with EmailJS](https://medium.com/@aashisrijal252/send-emails-from-a-static-website-for-free-using-emailjs-no-backend-needed-by-aashis-rijal-80c9cb892221) for the no-backend form delivery.
 - [Structuring an HTML/CSS project](https://blog.mikecodeur.com/en/post/structure-your-htmlcss-project-best-practices) for the folder layout.
-
-```
-
-```
