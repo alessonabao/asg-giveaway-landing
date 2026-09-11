@@ -62,12 +62,12 @@ document.querySelector("#app").innerHTML = `
 
       <div class="form-row">
         <div class="form-group">
-          <input class="form-control empty" type="text" id="firstName" name="firstName" required />
+          <input class="form-control empty" type="text" id="firstName" name="firstName" pattern="[A-Za-z\\s'-]+" required />
           <label for="firstName">First Name*</label>
         </div>
 
         <div class="form-group">
-          <input class="form-control empty" type="text" id="lastName" name="lastName" required />
+          <input class="form-control empty" type="text" id="lastName" name="lastName" pattern="[A-Za-z\\s'-]+" required />
           <label for="lastName">Last Name*</label>
         </div>
       </div>
@@ -164,6 +164,18 @@ phoneInput.addEventListener("input", () => {
     phoneInput.value = cleaned;
   }
   updatePhoneValidity();
+});
+
+/* Name fields: block digits and symbols (e.g. !@#$%^&*()_+) as the user
+  types, leaving only letters, spaces, hyphens and apostrophes (so names
+  like "Mary-Jane" or "O'Brien" still work). */
+document.querySelectorAll("#firstName, #lastName").forEach((input) => {
+  input.addEventListener("input", () => {
+    const cleaned = input.value.replace(/[^A-Za-z\s'-]/g, "");
+    if (input.value !== cleaned) {
+      input.value = cleaned;
+    }
+  });
 });
 
 /* Form submission: instead of the browser reloading the page on submit,

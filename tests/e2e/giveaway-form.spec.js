@@ -133,22 +133,36 @@ test.describe("Giveaway form validation", () => {
     expect(formValid).toBe(false);
   });
 
-  test("current behaviour: firstName has no letters-only restriction", async ({
+  test("firstName strips digits and symbols as they're typed", async ({
     page,
   }) => {
-    await fillForm(page, { ...VALID_ENTRY, firstName: "Andrew123" });
+    await fillForm(page, { ...VALID_ENTRY, firstName: "Andrew123!@#" });
+    const value = await page.locator("#firstName").inputValue();
+    expect(value).toBe("Andrew");
     const valid = await page
       .locator("#firstName")
       .evaluate((el) => el.checkValidity());
     expect(valid).toBe(true);
   });
 
-  test("current behaviour: lastName has no letters-only restriction", async ({
+  test("lastName strips digits and symbols as they're typed", async ({
     page,
   }) => {
-    await fillForm(page, { ...VALID_ENTRY, lastName: "Simms456" });
+    await fillForm(page, { ...VALID_ENTRY, lastName: "Simms456$%^" });
+    const value = await page.locator("#lastName").inputValue();
+    expect(value).toBe("Simms");
     const valid = await page
       .locator("#lastName")
+      .evaluate((el) => el.checkValidity());
+    expect(valid).toBe(true);
+  });
+
+  test("firstName still allows hyphens and apostrophes", async ({ page }) => {
+    await fillForm(page, { ...VALID_ENTRY, firstName: "Mary-Jane O'Brien" });
+    const value = await page.locator("#firstName").inputValue();
+    expect(value).toBe("Mary-Jane O'Brien");
+    const valid = await page
+      .locator("#firstName")
       .evaluate((el) => el.checkValidity());
     expect(valid).toBe(true);
   });
